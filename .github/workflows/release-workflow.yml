@@ -27,7 +27,7 @@ jobs:
       - name: Install mingw-w64 (for windows-gnu target)
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-mingw-w64-x86-64
+          sudo apt-get install -y gcc-mingw-w64-x86-64 build-essential pkg-config
 
       - name: Build (linux)
         run: cargo build --release
