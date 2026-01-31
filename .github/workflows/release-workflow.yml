@@ -46,8 +46,10 @@ jobs:
 
       - name: Upload assets to GitHub Release
         uses: softprops/action-gh-release@v2
+        env:
+          BIN: s4pi-reforged
         with:
           tag_name: ${{ github.event.release.tag_name }}
           files: |
-            mytool-linux-x86_64
-            mytool-windows-x86_64.exe
+            ${{ env.BIN }}-linux-x86_64
+            ${{ env.BIN }}-windows-x86_64.exe
