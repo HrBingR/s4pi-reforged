@@ -45,13 +45,9 @@ jobs:
           cp "target/x86_64-pc-windows-gnu/release/${BIN}.exe" "${BIN}-windows-x86_64.exe"
 
       - name: Upload assets to GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          tag="${{ github.event.release.tag_name }}"
-
-          gh release upload "$tag" \
-            mytool-linux-x86_64 \
-            mytool-windows-x86_64.exe \
-            --clobber
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: |
+            mytool-linux-x86_64
+            mytool-windows-x86_64.exe
