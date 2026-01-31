@@ -1,0 +1,57 @@
+name: Release binaries
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    # ARC runner-set name/label you mentioned
+    runs-on: [arc-runner-set-s4pi]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install Rust toolchain + the Windows GNU target
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-gnu
+
+      # Optional but recommended
+      - uses: Swatinem/rust-cache@v2
+
+      # Only needed if your runner image doesn't already include mingw-w64
+      - name: Install mingw-w64 (for windows-gnu target)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-mingw-w64-x86-64
+
+      - name: Build (linux)
+        run: cargo build --release
+
+      - name: Build (windows cross)
+        run: cargo build --release --target x86_64-pc-windows-gnu
+
+      - name: Prepare release asset filenames
+        run: |
+          set -euo pipefail
+          # change "mytool" to your actual binary name
+          BIN="s4pi-reforged"
+
+          cp "target/release/${BIN}" "${BIN}-linux-x86_64"
+          cp "target/x86_64-pc-windows-gnu/release/${BIN}.exe" "${BIN}-windows-x86_64.exe"
+
+      - name: Upload assets to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${{ github.event.release.tag_name }}"
+
+          gh release upload "$tag" \
+            mytool-linux-x86_64 \
+            mytool-windows-x86_64.exe \
+            --clobber
